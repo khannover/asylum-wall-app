@@ -225,6 +225,203 @@
     els.statTotal.textContent = cases.length;
     const platforms = new Set(cases.map((c) => c.platform).filter(Boolean));
     els.statPlatforms.textContent = platforms.size;
+    renderAnalytics(cases);
+  }
+
+  function countBy(cases, field) {
+    const map = new Map();
+    for (const c of cases) {
+      const key = (c[field] || "").trim() || "Unknown";
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }
+
+  function countTemplates(cases) {
+    const titles = Object.fromEntries((allTemplates || []).map((t) => [t.id, t.title]));
+    const map = new Map();
+    for (const c of cases) {
+      if (!c.template_id) continue;
+      const label = titles[c.template_id] || c.template_id;
+      map.set(label, (map.get(label) || 0) + 1);
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }
+
+  function countByMonth(cases) {
+    const map = new Map();
+    for (const c of cases) {
+      if (!c.timestamp) continue;
+      const d = new Date(c.timestamp);
+      if (Number.isNaN(d.getTime())) continue;
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }
+
+  function buildComboMatrix(cases, topN = 6) {
+    const platforms = countBy(cases, "platform").slice(0, topN).map((x) => x.label);
+    const incidents = countBy(cases, "incident_type").slice(0, topN).map((x) => x.label);
+    const counts = new Map();
+    let max = 0;
+
+    for (const c of cases) {
+      const p = (c.platform || "Unknown").trim();
+      const i = (c.incident_type || "Unknown").trim();
+      if (!platforms.includes(p) || !incidents.includes(i)) continue;
+      const key = `${p}|||${i}`;
+      const n = (counts.get(key) || 0) + 1;
+      counts.set(key, n);
+      if (n > max) max = n;
+    }
+    return { platforms, incidents, counts, max };
+  }
+
+  function chartEmpty(msg = "Not enough data yet") {
+    return `<p class="chart-empty">${escapeHtml(msg)}</p>`;
+  }
+
+  function renderBarChart(container, items, fillClass, filterField) {
+    if (!container) return;
+    if (!items.length) {
+      container.innerHTML = chartEmpty();
+      return;
+    }
+    const max = items[0].count;
+    container.innerHTML = `<div class="bar-chart">${items.map((item) => {
+      const pct = max ? Math.round((item.count / max) * 100) : 0;
+      const safeVal = item.label.replace(/"/g, "&quot;");
+      const labelHtml = filterField
+        ? `<button type="button" class="bar-label bar-label-clickable" data-filter-field="${filterField}" data-filter-value="${safeVal}" title="Filter ledger">${escapeHtml(item.label)}</button>`
+        : `<span class="bar-label" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>`;
+      return `
+        <div class="bar-row">
+          ${labelHtml}
+          <div class="bar-track"><div class="bar-fill ${fillClass}" style="width:${pct}%"></div></div>
+          <span class="bar-value">${item.count}</span>
+        </div>`;
+    }).join("")}</div>`;
+
+    if (filterField) {
+      container.querySelectorAll("[data-filter-field]").forEach((btn) => {
+        btn.addEventListener("click", () => applyLedgerFilter(btn.dataset.filterField, btn.dataset.filterValue));
+      });
+    }
+  }
+
+  function applyLedgerFilter(field, value) {
+    if (field === "platform") {
+      els.filterPlatform.value = value;
+      els.filterIncident.value = "";
+    } else if (field === "incident_type") {
+      els.filterIncident.value = value;
+      els.filterPlatform.value = "";
+    }
+    els.search.value = "";
+    renderGrid();
+    document.getElementById("ledger").scrollIntoView({ behavior: "smooth" });
+  }
+
+  function renderMatrix(container, matrix) {
+    if (!container) return;
+    const { platforms, incidents, counts, max } = matrix;
+    if (!platforms.length || !incidents.length) {
+      container.innerHTML = chartEmpty();
+      return;
+    }
+
+    const header = `<tr><th class="matrix-corner">Platform ↓ / Issue →</th>${incidents.map((i) => `<th>${escapeHtml(truncate(i, 18))}</th>`).join("")}</tr>`;
+    const rows = platforms.map((p) => {
+      const cells = incidents.map((i) => {
+        const n = counts.get(`${p}|||${i}`) || 0;
+        if (!n) return `<td class="matrix-cell matrix-cell-empty">·</td>`;
+        const intensity = max ? n / max : 0;
+        const bg = `rgba(255, 77, 77, ${0.15 + intensity * 0.75})`;
+        const hot = intensity > 0.55 ? " matrix-cell-hot" : "";
+        return `<td class="matrix-cell${hot}" style="background:${bg}">${n}</td>`;
+      }).join("");
+      return `<tr><td class="matrix-rowhead">${escapeHtml(truncate(p, 20))}</td>${cells}</tr>`;
+    }).join("");
+
+    container.innerHTML = `<div class="matrix-wrap"><table class="matrix-table"><thead>${header}</thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function renderTimeline(container, months) {
+    if (!container) return;
+    if (!months.length) {
+      container.innerHTML = chartEmpty();
+      return;
+    }
+
+    const recent = months.slice(-12);
+    const max = Math.max(...recent.map((m) => m.count), 1);
+
+    container.innerHTML = `<div class="timeline-chart">${recent.map((m) => {
+      const h = Math.max(8, Math.round((m.count / max) * 100));
+      const [y, mo] = m.label.split("-");
+      const short = new Date(Date.UTC(Number(y), Number(mo) - 1)).toLocaleString("en", { month: "short" });
+      return `
+        <div class="timeline-col" title="${m.label}: ${m.count} cases">
+          <span class="timeline-count">${m.count}</span>
+          <div class="timeline-bar-wrap"><div class="timeline-bar" style="height:${h}%"></div></div>
+          <span class="timeline-label">${short} '${String(y).slice(2)}</span>
+        </div>`;
+    }).join("")}</div>`;
+  }
+
+  function renderOverview(container, cases) {
+    if (!container) return;
+    if (!cases.length) {
+      container.innerHTML = "";
+      return;
+    }
+
+    const platforms = countBy(cases, "platform");
+    const incidents = countBy(cases, "incident_type");
+    const signals = cases.filter((c) => c.submission_type === "signal").length;
+    const reports = cases.length - signals;
+    const verified = cases.filter((c) => c.verified).length;
+    const withProof = cases.filter((c) => c.proof_file_name).length;
+    const edited = cases.filter((c) => c.edited_at).length;
+    const topCombo = (() => {
+      const m = new Map();
+      for (const c of cases) {
+        const k = `${c.platform || "?"} + ${c.incident_type || "?"}`;
+        m.set(k, (m.get(k) || 0) + 1);
+      }
+      return [...m.entries()].sort((a, b) => b[1] - a[1])[0];
+    })();
+
+    const cards = [
+      { value: platforms[0] ? `${platforms[0].label} (${platforms[0].count})` : "—", label: "Worst platform", cls: "overview-value-warn" },
+      { value: incidents[0] ? truncate(incidents[0].label, 22) : "—", label: `Top issue (${incidents[0]?.count ?? 0})`, cls: "overview-value-warn" },
+      { value: `${signals} / ${reports}`, label: "Signals vs full reports", cls: "overview-value-accent" },
+      { value: `${verified}`, label: `Verified cases (${cases.length ? Math.round((verified / cases.length) * 100) : 0}%)`, cls: "overview-value-trust" },
+      { value: `${withProof}`, label: "Entries with proof", cls: "" },
+      { value: topCombo ? truncate(topCombo[0], 28) : "—", label: `Top combo (${topCombo?.[1] ?? 0})`, cls: "overview-value-warn" },
+      { value: `${edited}`, label: "Edited entries", cls: "" },
+    ];
+
+    container.innerHTML = cards.map((c) => `
+      <div class="overview-card">
+        <span class="overview-value ${c.cls}">${escapeHtml(String(c.value))}</span>
+        <span class="overview-label">${escapeHtml(c.label)}</span>
+      </div>`).join("");
+  }
+
+  function renderAnalytics(cases) {
+    renderOverview($("#analytics-overview"), cases);
+    renderBarChart($("#chart-platforms"), countBy(cases, "platform").slice(0, 8), "bar-fill-platform", "platform");
+    renderBarChart($("#chart-incidents"), countBy(cases, "incident_type").slice(0, 8), "bar-fill-incident", "incident_type");
+    renderMatrix($("#chart-matrix"), buildComboMatrix(cases, 6));
+    renderBarChart($("#chart-templates"), countTemplates(cases).slice(0, 8), "bar-fill-template");
+    renderBarChart($("#chart-reasons"), countBy(cases, "reason_category").filter((x) => x.label !== "Unknown").slice(0, 8), "bar-fill-reason");
+    renderTimeline($("#chart-timeline"), countByMonth(cases).map(([label, count]) => ({ label, count })));
   }
 
   function renderTemplates() {
@@ -536,6 +733,7 @@
       populateFilters(allCases);
       renderGrid();
       await loadTemplates();
+      renderAnalytics(allCases);
     } catch {
       showToast("Could not load cases. Is the server running?", "error");
       els.empty.hidden = false;

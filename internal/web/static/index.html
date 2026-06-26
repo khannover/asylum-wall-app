@@ -24,6 +24,7 @@
         </span>
       </a>
       <nav class="header-nav">
+        <a href="#analytics" class="nav-link">Statistics</a>
         <a href="#ledger" class="nav-link">Ledger</a>
         <a href="#about" class="nav-link">How it works</a>
         <button type="button" class="btn btn-ghost" id="open-submit">Full report</button>
@@ -62,6 +63,51 @@
           <span class="stat-label">Every entry is a Git commit</span>
         </div>
       </aside>
+    </section>
+
+    <section class="analytics-section" id="analytics">
+      <div class="analytics-header">
+        <div>
+          <p class="signal-eyebrow">Censorship patterns</p>
+          <h2 class="signal-title">Who hurts artists most?</h2>
+          <p class="signal-lead">Live breakdown from the ledger — platforms, incident types, and how they combine.</p>
+        </div>
+      </div>
+
+      <div class="analytics-overview" id="analytics-overview" aria-label="Overview statistics"></div>
+
+      <div class="analytics-grid">
+        <article class="chart-panel">
+          <h3 class="chart-title">Worst platforms</h3>
+          <p class="chart-desc">By number of logged cases</p>
+          <div class="chart-body" id="chart-platforms"></div>
+        </article>
+        <article class="chart-panel">
+          <h3 class="chart-title">Worst incident types</h3>
+          <p class="chart-desc">Most common enforcement actions</p>
+          <div class="chart-body" id="chart-incidents"></div>
+        </article>
+        <article class="chart-panel chart-panel-wide">
+          <h3 class="chart-title">Platform × incident</h3>
+          <p class="chart-desc">Where each type of harm clusters</p>
+          <div class="chart-body chart-body-matrix" id="chart-matrix"></div>
+        </article>
+        <article class="chart-panel">
+          <h3 class="chart-title">Common issue signals</h3>
+          <p class="chart-desc">Quick-signal template picks</p>
+          <div class="chart-body" id="chart-templates"></div>
+        </article>
+        <article class="chart-panel">
+          <h3 class="chart-title">Reason categories</h3>
+          <p class="chart-desc">Stated grounds when provided</p>
+          <div class="chart-body" id="chart-reasons"></div>
+        </article>
+        <article class="chart-panel chart-panel-wide">
+          <h3 class="chart-title">Cases over time</h3>
+          <p class="chart-desc">Monthly volume on the ledger</p>
+          <div class="chart-body chart-body-timeline" id="chart-timeline"></div>
+        </article>
+      </div>
     </section>
 
     <section class="signal-section" id="signal">
