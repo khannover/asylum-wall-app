@@ -323,7 +323,7 @@ a:hover { text-decoration: underline; }
 .overview-value {
   display: block;
   font-family: var(--font-mono);
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 500;
   line-height: 1.2;
   margin-bottom: 6px;
