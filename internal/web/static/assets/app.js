@@ -397,14 +397,44 @@
       return [...m.entries()].sort((a, b) => b[1] - a[1])[0];
     })();
 
+    const verifiedPct = cases.length ? Math.round((verified / cases.length) * 100) : 0;
+
     const cards = [
-      { value: platforms[0] ? `${platforms[0].label} (${platforms[0].count})` : "—", label: "Worst platform", cls: "overview-value-warn" },
-      { value: incidents[0] ? truncate(incidents[0].label, 22) : "—", label: `Top issue (${incidents[0]?.count ?? 0})`, cls: "overview-value-warn" },
-      { value: `${signals} / ${reports}`, label: "Signals vs full reports", cls: "overview-value-accent" },
-      { value: `${verified}`, label: `Verified cases (${cases.length ? Math.round((verified / cases.length) * 100) : 0}%)`, cls: "overview-value-trust" },
-      { value: `${withProof}`, label: "Entries with proof", cls: "" },
-      { value: topCombo ? truncate(topCombo[0], 28) : "—", label: `Top combo (${topCombo?.[1] ?? 0})`, cls: "overview-value-warn" },
-      { value: `${edited}`, label: "Edited entries", cls: "" },
+      {
+        value: platforms[0] ? String(platforms[0].count) : "—",
+        label: platforms[0] ? `Worst platform: ${platforms[0].label}` : "Worst platform",
+        cls: "overview-value-warn",
+      },
+      {
+        value: incidents[0] ? String(incidents[0].count) : "—",
+        label: incidents[0] ? `Top issue: ${incidents[0].label}` : "Top incident type",
+        cls: "overview-value-warn",
+      },
+      {
+        value: `${signals} / ${reports}`,
+        label: "Signals vs full reports",
+        cls: "overview-value-accent",
+      },
+      {
+        value: String(verified),
+        label: `Verified (${verifiedPct}% of cases)`,
+        cls: "overview-value-trust",
+      },
+      {
+        value: String(withProof),
+        label: "Entries with proof attached",
+        cls: "",
+      },
+      {
+        value: topCombo ? String(topCombo[1]) : "—",
+        label: topCombo ? `Top combo: ${topCombo[0]}` : "Top platform + issue pair",
+        cls: "overview-value-warn",
+      },
+      {
+        value: String(edited),
+        label: "Edited entries",
+        cls: "",
+      },
     ];
 
     container.innerHTML = cards.map((c) => `

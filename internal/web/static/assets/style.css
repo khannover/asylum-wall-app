@@ -306,7 +306,7 @@ a:hover { text-decoration: underline; }
 
 .analytics-overview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
   gap: 12px;
   margin-bottom: 28px;
 }
@@ -315,16 +315,21 @@ a:hover { text-decoration: underline; }
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 18px;
+  padding: 14px 16px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .overview-value {
   display: block;
   font-family: var(--font-mono);
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 500;
-  line-height: 1.1;
-  margin-bottom: 4px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .overview-value-warn { color: var(--danger); }
@@ -332,9 +337,14 @@ a:hover { text-decoration: underline; }
 .overview-value-trust { color: var(--trust); }
 
 .overview-label {
-  font-size: 0.78rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 0.76rem;
   color: var(--text-muted);
-  line-height: 1.3;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .analytics-grid {
