@@ -19,6 +19,9 @@ type Config struct {
 	SignalMaxPerDay    int
 	SignalDuplicateTTL time.Duration
 	EditToken          string
+	DiscordWebhookURL  string
+	PublicSiteURL      string
+	VerifyMaxPerHour   int
 }
 
 func Load() Config {
@@ -28,6 +31,7 @@ func Load() Config {
 	signalHour, _ := strconv.Atoi(getEnv("SIGNAL_MAX_PER_HOUR", "5"))
 	signalDay, _ := strconv.Atoi(getEnv("SIGNAL_MAX_PER_DAY", "20"))
 	dupHours, _ := strconv.Atoi(getEnv("SIGNAL_DUPLICATE_HOURS", "24"))
+	verifyHour, _ := strconv.Atoi(getEnv("VERIFY_MAX_PER_HOUR", "10"))
 
 	return Config{
 		Port:               port,
@@ -42,6 +46,9 @@ func Load() Config {
 		SignalMaxPerDay:    signalDay,
 		SignalDuplicateTTL: time.Duration(dupHours) * time.Hour,
 		EditToken:          os.Getenv("EDIT_TOKEN"),
+		DiscordWebhookURL:  os.Getenv("DISCORD_WEBHOOK_URL"),
+		PublicSiteURL:      getEnv("PUBLIC_SITE_URL", getEnv("SITE_URL", "")),
+		VerifyMaxPerHour:   verifyHour,
 	}
 }
 

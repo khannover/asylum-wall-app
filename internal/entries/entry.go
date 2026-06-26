@@ -27,8 +27,9 @@ type Entry struct {
 	ReasonCategory     string `json:"reason_category"`
 	Story              string `json:"story,omitempty"`
 	ProofFileName      string `json:"proof_file_name,omitempty"`
-	Verified           bool   `json:"verified"`
-	EditedAt           string `json:"edited_at,omitempty"`
+	Verified                  bool   `json:"verified"`
+	VerificationRequestedAt   string `json:"verification_requested_at,omitempty"`
+	EditedAt                  string `json:"edited_at,omitempty"`
 }
 
 type SubmitInput struct {

@@ -773,6 +773,12 @@ a:hover { text-decoration: underline; }
   border-top: 1px solid var(--border);
 }
 
+.modal-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .modal-footer-note {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -924,6 +930,19 @@ a:hover { text-decoration: underline; }
   font-size: 0.72rem;
   color: var(--text-dim);
   letter-spacing: 0.06em;
+}
+
+.case-pending {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: rgba(232, 184, 74, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(232, 184, 74, 0.3);
 }
 
 .case-verified {

@@ -175,6 +175,10 @@
           <h3>03 — Simple prevails</h3>
           <p>No blockchain theater. No proprietary silos. Files on disk, versioned by Git — the same tools developers trust for decades.</p>
         </article>
+        <article class="about-card">
+          <h3>04 — What verified means</h3>
+          <p>A verified badge means a moderator reviewed this entry and found it credible enough to stand behind publicly — usually because there’s proof attached or enough specific detail to check. It’s not a legal ruling or a personal endorsement of the artist. Anyone can ask for a case to be reviewed; requests are logged on the ledger.</p>
+        </article>
       </div>
     </section>
   </main>
@@ -199,8 +203,11 @@
         <div class="modal-proof" id="modal-proof"></div>
       </div>
       <footer class="modal-footer" id="modal-footer" hidden>
-        <button type="button" class="btn btn-ghost btn-sm" id="edit-case-btn">Edit entry</button>
-        <span class="modal-footer-note">Changes become a new Git commit</span>
+        <div class="modal-footer-actions">
+          <button type="button" class="btn btn-ghost btn-sm" id="request-verify-btn" hidden>Request verification</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="edit-case-btn" hidden>Edit entry</button>
+        </div>
+        <span class="modal-footer-note" id="modal-footer-note"></span>
       </footer>
     </div>
   </dialog>

@@ -14,7 +14,10 @@
   const EDIT_TOKEN_KEY = "asylum_edit_token";
 
   let editEnabled = false;
+  let verificationRequestsEnabled = false;
   let activeCase = null;
+
+  const VERIFY_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000;
 
   const PLATFORM_URLS = {
     "Bandcamp": (n) => {
@@ -97,6 +100,9 @@
     editFileDropText: $("#edit-file-drop-text"),
     editProofInput: $("#edit_proof_file"),
     modalFooter: $("#modal-footer"),
+    modalFooterNote: $("#modal-footer-note"),
+    requestVerifyBtn: $("#request-verify-btn"),
+    editCaseBtn: $("#edit-case-btn"),
   };
 
   function escapeHtml(str) {
@@ -516,9 +522,21 @@
     return "No story provided.";
   }
 
+  function isVerificationPending(c) {
+    return !c.verified && !!c.verification_requested_at;
+  }
+
+  function canRequestVerification(c) {
+    if (!verificationRequestsEnabled || c.verified) return false;
+    if (!c.verification_requested_at) return true;
+    const requested = new Date(c.verification_requested_at).getTime();
+    return Number.isFinite(requested) && Date.now() - requested >= VERIFY_COOLDOWN_MS;
+  }
+
   function renderCard(c, index) {
     const id = String(c.id).padStart(4, "0");
     const verified = c.verified ? '<span class="case-verified">Verified</span>' : "";
+    const pending = isVerificationPending(c) ? '<span class="case-pending">Review pending</span>' : "";
     const typeClass = c.submission_type === "signal" ? "case-type-signal" : "case-type-report";
     return `
       <article class="case-card" role="listitem" data-id="${c.id}" style="animation-delay:${index * 0.05}s">
@@ -526,6 +544,7 @@
           <span class="case-id">ENTRY_${id}</span>
           <span class="case-type ${typeClass}">${submissionLabel(c)}</span>
           ${verified}
+          ${pending}
         </div>
         <h3 class="case-artist">${renderAccountHTML(c)}</h3>
         <div class="case-platform">${escapeHtml(c.platform)}</div>
@@ -590,7 +609,7 @@
     }
     $("#modal-meta").innerHTML = meta;
 
-    els.modalFooter.hidden = !editEnabled;
+    updateCaseModalFooter(c);
 
     const tags = [
       `<span class="tag">${escapeHtml(c.platform)}</span>`,
@@ -601,6 +620,8 @@
     }
     if (c.verified) {
       tags.push('<span class="tag" style="background:rgba(110,231,168,0.12);color:var(--verified);border-color:rgba(110,231,168,0.3)">Verified</span>');
+    } else if (isVerificationPending(c)) {
+      tags.push('<span class="tag" style="background:rgba(232,184,74,0.12);color:var(--accent);border-color:rgba(232,184,74,0.3)">Review pending</span>');
     }
     $("#modal-tags").innerHTML = tags.join("");
 
@@ -624,6 +645,66 @@
     }
 
     els.caseModal.showModal();
+  }
+
+  function updateCaseModalFooter(c) {
+    const showEdit = editEnabled;
+    const showRequest = verificationRequestsEnabled && !c.verified;
+    const pending = isVerificationPending(c);
+    const canRequest = canRequestVerification(c);
+
+    els.editCaseBtn.hidden = !showEdit;
+    els.requestVerifyBtn.hidden = !showRequest;
+    els.requestVerifyBtn.disabled = !canRequest;
+    els.requestVerifyBtn.textContent = pending && !canRequest
+      ? "Verification requested"
+      : "Request verification";
+
+    els.modalFooter.hidden = !(showEdit || showRequest);
+
+    if (showEdit && showRequest) {
+      els.modalFooterNote.textContent = "Edits and requests become Git commits";
+    } else if (showEdit) {
+      els.modalFooterNote.textContent = "Changes become a new Git commit";
+    } else if (pending && !canRequest) {
+      els.modalFooterNote.textContent = "A moderator will review this case";
+    } else if (showRequest) {
+      els.modalFooterNote.textContent = "Asks a moderator to review this entry";
+    } else {
+      els.modalFooterNote.textContent = "";
+    }
+  }
+
+  async function requestVerification() {
+    if (!activeCase || !canRequestVerification(activeCase)) return;
+
+    const btn = els.requestVerifyBtn;
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Requesting…";
+
+    try {
+      const res = await fetch(`/api/cases/${activeCase.id}/request-verification`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+
+      showToast(data.message || "Verification requested.");
+      await loadCases();
+      const updated = allCases.find((x) => x.id === activeCase.id);
+      if (updated) openCaseModal(updated);
+    } catch (err) {
+      showToast(err.message, "error");
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  function openEntryFromHash() {
+    const match = location.hash.match(/^#entry-(\d+)$/);
+    if (!match) return;
+    const id = Number(match[1]);
+    const c = allCases.find((x) => x.id === id);
+    if (c) openCaseModal(c);
   }
 
   function openEditModal() {
@@ -659,8 +740,10 @@
       if (!res.ok) return;
       const data = await res.json();
       editEnabled = !!data.edit_enabled;
+      verificationRequestsEnabled = !!data.verification_requests_enabled;
     } catch {
       editEnabled = false;
+      verificationRequestsEnabled = false;
     }
   }
 
@@ -764,6 +847,7 @@
       renderGrid();
       await loadTemplates();
       renderAnalytics(allCases);
+      openEntryFromHash();
     } catch {
       showToast("Could not load cases. Is the server running?", "error");
       els.empty.hidden = false;
@@ -845,7 +929,8 @@
     });
 
     $("#close-modal").addEventListener("click", () => els.caseModal.close());
-    $("#edit-case-btn")?.addEventListener("click", openEditModal);
+    els.editCaseBtn?.addEventListener("click", openEditModal);
+    els.requestVerifyBtn?.addEventListener("click", requestVerification);
     $("#close-edit")?.addEventListener("click", () => els.editModal.close());
     $("#cancel-edit")?.addEventListener("click", () => els.editModal.close());
     $("#close-signal").addEventListener("click", () => els.signalModal.close());

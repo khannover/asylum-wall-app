@@ -19,6 +19,7 @@ type server struct {
 	cfg       config.Config
 	submitter *handlers.Submitter
 	editor    *handlers.Editor
+	verifier  *handlers.VerifyRequester
 }
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 		cfg:       cfg,
 		submitter: handlers.NewSubmitter(cfg, repo, limiter),
 		editor:    handlers.NewEditor(cfg, repo, limiter),
+		verifier:  handlers.NewVerifyRequester(cfg, repo, limiter),
 	}
 
 	mux := http.NewServeMux()
@@ -46,11 +48,12 @@ func main() {
 	mux.HandleFunc("GET /health", handleHealth)
 	mux.HandleFunc("GET /api/templates", s.handleTemplates)
 	mux.HandleFunc("GET /api/cases", s.handleListCases)
-	mux.HandleFunc("GET /api/meta", s.editor.HandleMeta)
+	mux.HandleFunc("GET /api/meta", s.handleMeta)
 	mux.HandleFunc("GET /api/proof/{file}", handlers.ServeProof(cfg.RepoPath))
 	mux.HandleFunc("POST /api/signal", s.submitter.HandleSignal)
 	mux.HandleFunc("POST /api/submit-case", s.submitter.HandleReport)
 	mux.HandleFunc("PATCH /api/cases/{id}", s.editor.HandleEdit)
+	mux.HandleFunc("POST /api/cases/{id}/request-verification", s.verifier.HandleRequest)
 
 	handler := withCORS(mux)
 	addr := fmt.Sprintf(":%d", cfg.Port)
@@ -65,6 +68,16 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 		"status":  "ok",
 		"version": web.Version,
 	})
+}
+
+func (s *server) handleMeta(w http.ResponseWriter, r *http.Request) {
+	meta := map[string]bool{
+		"edit_enabled": s.cfg.EditToken != "",
+	}
+	for k, v := range s.verifier.HandleMetaFields() {
+		meta[k] = v
+	}
+	writeJSON(w, http.StatusOK, meta)
 }
 
 func (s *server) handleListCases(w http.ResponseWriter, r *http.Request) {

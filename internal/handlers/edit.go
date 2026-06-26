@@ -25,12 +25,6 @@ func NewEditor(cfg config.Config, repo *gitrepo.Repo, limiter *ratelimit.Limiter
 	return &Editor{cfg: cfg, repo: repo, limiter: limiter}
 }
 
-func (e *Editor) HandleMeta(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]bool{
-		"edit_enabled": e.cfg.EditToken != "",
-	})
-}
-
 func (e *Editor) HandleEdit(w http.ResponseWriter, r *http.Request) {
 	if e.cfg.EditToken == "" {
 		writeError(w, http.StatusForbidden, "editing is not enabled on this server")

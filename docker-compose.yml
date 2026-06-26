@@ -18,6 +18,9 @@ services:
       REPO_PATH: /repo
       PORT: 8080
       EDIT_TOKEN: ${EDIT_TOKEN:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+      PUBLIC_SITE_URL: ${PUBLIC_SITE_URL:-}
+      VERIFY_MAX_PER_HOUR: ${VERIFY_MAX_PER_HOUR:-10}
     volumes:
       - asylum-repo:/repo
     # For SSH deploy key auth, uncomment and mount your key:
