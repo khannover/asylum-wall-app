@@ -47,6 +47,25 @@ docker compose down -v && docker compose up -d --build
 3. Grant **Contents: Read and write** on the target repository.
 4. Set `GITHUB_TOKEN` in `.env`.
 
+### Publish Docker image to GHCR
+
+Pushes run from CI (`.github/workflows/docker-publish.yml`) on each push to `main`, or locally:
+
+```bash
+# One-time: grant gh CLI package + workflow scopes
+gh auth refresh -h github.com -s write:packages,workflow
+
+# Push workflow (first time only, if not on GitHub yet)
+git add .github/workflows/docker-publish.yml && git commit -m "Add GHCR publish workflow" && git push
+
+# Or build and push manually
+./scripts/publish-image.sh latest
+```
+
+Image: `ghcr.io/khannover/asylum-wall-app:latest`
+
+After the first push, set the package to **public** under GitHub → Packages → asylum-wall-app → Package settings.
+
 ### SSH Deploy Key (alternative)
 
 Mount a read-write deploy key and use an SSH `REPO_URL`:
