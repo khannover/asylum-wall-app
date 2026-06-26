@@ -6,6 +6,17 @@ Go server + embedded dashboard for the [Bancamp Asylum Wall](https://github.com/
 
 ## Quick Start
 
+**From GHCR (no local build):**
+
+```bash
+cp .env.example .env
+# Edit .env with your REPO_URL and GITHUB_TOKEN
+docker pull ghcr.io/khannover/asylum-wall-app:latest
+docker compose up -d
+```
+
+Set `image: ghcr.io/khannover/asylum-wall-app:latest` in `docker-compose.yml`, or build locally:
+
 ```bash
 cp .env.example .env
 # Edit .env with your REPO_URL and GITHUB_TOKEN
