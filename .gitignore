@@ -1,0 +1,5 @@
+.env
+/repo/
+asylum-wall
+asylum-wall-app
+*.exe

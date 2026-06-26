@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asylum Wall — Bancamp Censorship Log</title>
+  <meta name="description" content="Public, Git-anchored ledger of platform censorship incidents against independent artists.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="/" class="brand">
+        <span class="brand-mark" aria-hidden="true">▮</span>
+        <span class="brand-text">
+          <strong>Asylum Wall</strong>
+          <small>Bancamp.de</small>
+        </span>
+      </a>
+      <nav class="header-nav">
+        <a href="#ledger" class="nav-link">Ledger</a>
+        <a href="#about" class="nav-link">How it works</a>
+        <button type="button" class="btn btn-ghost" id="open-submit">Full report</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-eyebrow">Git-anchored · Append-only · Public</p>
+        <h1 class="hero-title">
+          They silenced you.<br>
+          <em>We write it down.</em>
+        </h1>
+        <p class="hero-lead">
+          An immutable public ledger where banned and restricted artists document platform incidents —
+          shadowbans, false copyright strikes, reach throttling — backed by a transparent Git repository.
+        </p>
+        <div class="hero-actions">
+          <a href="#signal" class="btn btn-primary btn-lg">Same issue? Signal it</a>
+          <a href="#ledger" class="btn btn-ghost btn-lg">Browse cases</a>
+        </div>
+      </div>
+      <aside class="hero-stats" aria-label="Statistics">
+        <div class="stat-card">
+          <span class="stat-value" id="stat-total">—</span>
+          <span class="stat-label">Cases logged</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="stat-platforms">—</span>
+          <span class="stat-label">Platforms</span>
+        </div>
+        <div class="stat-card stat-card-accent">
+          <span class="stat-icon" aria-hidden="true">⛓</span>
+          <span class="stat-label">Every entry is a Git commit</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="signal-section" id="signal">
+      <div class="signal-header">
+        <div>
+          <p class="signal-eyebrow">Quick signal · 10 common cases</p>
+          <h2 class="signal-title">Recognize your situation?</h2>
+          <p class="signal-lead">Tap the issue that matches yours. One click to add your name to the ledger — story and proof optional.</p>
+        </div>
+        <a href="#" class="signal-report-link" id="open-submit-inline">Unusual case? Write a full report →</a>
+      </div>
+      <div id="templates-grid" class="templates-grid" role="list"></div>
+    </section>
+
+    <section class="filters" id="ledger">
+      <div class="filters-inner">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          <input type="search" id="search" class="search-input" placeholder="Search account, platform, story…" autocomplete="off">
+        </div>
+        <select id="filter-platform" class="filter-select" aria-label="Filter by platform">
+          <option value="">All platforms</option>
+        </select>
+        <select id="filter-incident" class="filter-select" aria-label="Filter by incident type">
+          <option value="">All incident types</option>
+        </select>
+        <select id="sort-by" class="filter-select" aria-label="Sort cases">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="account">Account A–Z</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="cases-section">
+      <div id="cases-loading" class="cases-loading" hidden>
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+      <div id="cases-empty" class="cases-empty" hidden>
+        <div class="empty-icon" aria-hidden="true">∅</div>
+        <h2>No cases yet</h2>
+        <p>Be the first to document a censorship incident. Your entry becomes a permanent Git record.</p>
+        <button type="button" class="btn btn-primary" id="empty-submit">Signal the first case</button>
+      </div>
+      <div id="cases-grid" class="cases-grid" role="list"></div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="about-grid">
+        <article class="about-card">
+          <h3>01 — Immutable ledger</h3>
+          <p>Every submission is a JSON file + proof artifact committed to a public GitHub repository. No database to tamper with. History is auditable.</p>
+        </article>
+        <article class="about-card">
+          <h3>02 — Artist-first</h3>
+          <p>Built for Bancamp artists facing opaque platform enforcement. Document bans, strikes, and shadowbans with evidence attached.</p>
+        </article>
+        <article class="about-card">
+          <h3>03 — Simple prevails</h3>
+          <p>No blockchain theater. No proprietary silos. Files on disk, versioned by Git — the same tools developers trust for decades.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Asylum Wall · An honest censorship log for independent music</p>
+    <p class="footer-mono">append-only · filesystem-as-database · open source</p>
+  </footer>
+
+  <!-- Case detail modal -->
+  <dialog class="modal" id="case-modal" aria-labelledby="modal-title">
+    <div class="modal-inner">
+      <button type="button" class="modal-close" id="close-modal" aria-label="Close">&times;</button>
+      <header class="modal-header">
+        <span class="modal-id" id="modal-id"></span>
+        <h2 id="modal-title" class="modal-title"></h2>
+        <div class="modal-meta" id="modal-meta"></div>
+      </header>
+      <div class="modal-body">
+        <div class="modal-tags" id="modal-tags"></div>
+        <div class="modal-story" id="modal-story"></div>
+        <div class="modal-proof" id="modal-proof"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Signal modal -->
+  <dialog class="modal modal-form" id="signal-modal" aria-labelledby="signal-title">
+    <div class="modal-inner">
+      <button type="button" class="modal-close" id="close-signal" aria-label="Close">&times;</button>
+      <header class="modal-header">
+        <span class="modal-id" id="signal-template-label"></span>
+        <h2 id="signal-title" class="modal-title"></h2>
+        <p class="modal-subtitle" id="signal-desc"></p>
+      </header>
+      <form id="signal-form" class="submit-form" enctype="multipart/form-data">
+        <input type="hidden" name="template_id" id="signal_template_id">
+        <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="form-row form-row-2">
+          <div>
+            <label class="form-label" for="signal_account_name">Account name on platform <span class="req">*</span></label>
+            <input class="form-input" type="text" id="signal_account_name" name="account_name" required minlength="2" maxlength="200" placeholder="@handle or display name" autocomplete="username">
+            <p class="field-hint" id="signal-profile-preview" hidden></p>
+          </div>
+          <div>
+            <label class="form-label" for="signal_platform">Platform <span class="req">*</span></label>
+            <select class="form-input form-select" id="signal_platform" name="platform" required>
+              <option value="" disabled selected>Select platform…</option>
+              <option value="Bandcamp">Bandcamp</option>
+              <option value="Spotify">Spotify</option>
+              <option value="YouTube">YouTube</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Apple Music">Apple Music</option>
+              <option value="SoundCloud">SoundCloud</option>
+              <option value="DistroKid">DistroKid</option>
+              <option value="Facebook">Facebook</option>
+              <option value="X / Twitter">X / Twitter</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="signal_bancamp_profile">Bancamp profile <span class="opt">optional</span></label>
+          <input class="form-input" type="url" id="signal_bancamp_profile" name="bancamp_profile" maxlength="500" placeholder="https://bancamp.de/artist/…">
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="signal_story">Add context <span class="opt">optional</span></label>
+          <textarea class="form-input form-textarea form-textarea-sm" id="signal_story" name="story" maxlength="10000" rows="3" placeholder="A sentence or two — dates, what you lost, etc."></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="signal_proof_file">Attach proof <span class="opt">optional</span></label>
+          <div class="file-drop file-drop-sm" id="signal-file-drop">
+            <input type="file" id="signal_proof_file" name="proof_file" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.eml,image/*,application/pdf">
+            <span class="file-drop-text" id="signal-file-drop-text">Screenshot or PDF — max 5MB</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="cancel-signal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-signal" id="signal-btn">
+            <span class="btn-label">Same issue here</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+        </div>
+        <p class="form-note form-note-muted">Rate limited per IP to prevent spam. One signal per issue per day.</p>
+        <p class="form-note" id="signal-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Full report modal -->
+  <dialog class="modal modal-form" id="submit-modal" aria-labelledby="submit-title">
+    <div class="modal-inner">
+      <button type="button" class="modal-close" id="close-submit" aria-label="Close">&times;</button>
+      <header class="modal-header">
+        <h2 id="submit-title" class="modal-title">Full censorship report</h2>
+        <p class="modal-subtitle">For unusual cases. Only artist, platform, and incident type required — story and proof optional.</p>
+      </header>
+      <form id="submit-form" class="submit-form" enctype="multipart/form-data">
+        <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="form-row">
+          <label class="form-label" for="account_name">Account name on platform <span class="req">*</span></label>
+          <input class="form-input" type="text" id="account_name" name="account_name" required minlength="2" maxlength="200" placeholder="@handle or display name" autocomplete="username">
+          <p class="field-hint" id="report-profile-preview" hidden></p>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="bancamp_profile">Bancamp profile</label>
+          <input class="form-input" type="url" id="bancamp_profile" name="bancamp_profile" maxlength="500" placeholder="https://bancamp.de/artist/…">
+        </div>
+        <div class="form-row form-row-2">
+          <div>
+            <label class="form-label" for="platform">Platform <span class="req">*</span></label>
+            <input class="form-input" type="text" id="platform" name="platform" required maxlength="200" list="platform-list" placeholder="Spotify, YouTube…">
+            <datalist id="platform-list">
+              <option value="Bandcamp"><option value="Spotify"><option value="YouTube"><option value="TikTok">
+              <option value="Instagram"><option value="DistroKid"><option value="Apple Music">
+              <option value="SoundCloud"><option value="Facebook"><option value="X / Twitter">
+            </datalist>
+          </div>
+          <div>
+            <label class="form-label" for="incident_type">Incident type <span class="req">*</span></label>
+            <input class="form-input" type="text" id="incident_type" name="incident_type" required maxlength="200" list="incident-list" placeholder="Account Ban, Shadowban…">
+            <datalist id="incident-list">
+              <option value="Account Ban"><option value="False Copyright Strike">
+              <option value="Shadowban"><option value="Reach Restriction">
+              <option value="Distribution Rejection">
+            </datalist>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="reason_category">Reason category</label>
+          <input class="form-input" type="text" id="reason_category" name="reason_category" maxlength="200" list="reason-list" placeholder="AI-Detection False Positive…">
+          <datalist id="reason-list">
+            <option value="AI-Detection False Positive"><option value="Alleged Artificial Streaming">
+            <option value="Manual Abuse"><option value="Cover Art Violation">
+            <option value="Terms of Service"><option value="Copyright Claim">
+          </datalist>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="story">Your story <span class="opt">optional</span></label>
+          <textarea class="form-input form-textarea" id="story" name="story" maxlength="10000" rows="5" placeholder="What happened? Include dates, communications, and impact on your reach or income."></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="proof_file">Proof file <span class="opt">optional</span></label>
+          <div class="file-drop" id="file-drop">
+            <input type="file" id="proof_file" name="proof_file" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.eml,image/*,application/pdf">
+            <span class="file-drop-text" id="file-drop-text">Drop screenshot, PDF, or email (.eml) — max 5MB</span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="cancel-submit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <span class="btn-label">Commit to ledger</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+        </div>
+        <p class="form-note" id="form-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

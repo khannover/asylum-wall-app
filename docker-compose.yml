@@ -1,0 +1,27 @@
+services:
+  asylum-wall:
+    build: .
+    container_name: asylum-wall
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      REPO_URL: ${REPO_URL}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GIT_BRANCH: ${GIT_BRANCH:-main}
+      GIT_USER_NAME: ${GIT_USER_NAME:-Asylum Wall Bot}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL:-asylum-wall@bancamp.de}
+      REPO_PATH: /repo
+      PORT: 8080
+    volumes:
+      - asylum-repo:/repo
+    # For SSH deploy key auth, uncomment and mount your key:
+    # volumes:
+    #   - asylum-repo:/repo
+    #   - ./deploy_key:/home/asylum/.ssh/id_ed25519:ro
+    # environment:
+    #   REPO_URL: git@github.com:your-org/asylum-wall-ledger.git
+    #   GIT_SSH_COMMAND: ssh -i /home/asylum/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new
+
+volumes:
+  asylum-repo:
