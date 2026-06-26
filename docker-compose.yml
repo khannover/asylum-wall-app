@@ -23,6 +23,13 @@ services:
     # environment:
     #   REPO_URL: git@github.com:your-org/asylum-wall-ledger.git
     #   GIT_SSH_COMMAND: ssh -i /home/asylum/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new
+    networks:
+      - default
+      - shared_net
 
 volumes:
   asylum-repo:
+networks:
+  shared_net:
+    name: bancamp-net
+    external: true
