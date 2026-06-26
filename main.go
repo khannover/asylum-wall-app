@@ -12,6 +12,7 @@ import (
 	"github.com/khannover/asylum-wall-app/internal/handlers"
 	"github.com/khannover/asylum-wall-app/internal/ratelimit"
 	"github.com/khannover/asylum-wall-app/internal/templates"
+	"github.com/khannover/asylum-wall-app/internal/web"
 )
 
 type server struct {
@@ -59,7 +60,10 @@ func main() {
 }
 
 func handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	writeJSON(w, http.StatusOK, map[string]string{
+		"status":  "ok",
+		"version": web.Version,
+	})
 }
 
 func (s *server) handleListCases(w http.ResponseWriter, r *http.Request) {

@@ -6,7 +6,10 @@ COPY main.go ./
 COPY internal/ ./internal/
 # web assets are embedded via internal/web/embed.go
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o asylum-wall .
+ARG APP_VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-s -w -X github.com/khannover/asylum-wall-app/internal/web.Version=${APP_VERSION}" \
+    -o asylum-wall .
 
 FROM alpine:3.20
 

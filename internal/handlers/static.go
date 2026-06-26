@@ -18,30 +18,40 @@ func Static() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clean := path.Clean(r.URL.Path)
 		if clean == "/" || clean == "." {
-			serveFile(w, r, sub, "index.html")
+			serveIndex(w, sub)
 			return
 		}
 		name := strings.TrimPrefix(clean, "/")
 		if _, err := sub.Open(name); err != nil {
-			serveFile(w, r, sub, "index.html")
+			serveIndex(w, sub)
 			return
 		}
+		setAssetCache(w, name)
 		fileServer.ServeHTTP(w, r)
 	})
 }
 
-func serveFile(w http.ResponseWriter, r *http.Request, fsys fs.FS, name string) {
-	data, err := fs.ReadFile(fsys, name)
+func serveIndex(w http.ResponseWriter, fsys fs.FS) {
+	data, err := fs.ReadFile(fsys, "index.html")
 	if err != nil {
-		http.NotFound(w, r)
+		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
-	if strings.HasSuffix(name, ".html") {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	} else if strings.HasSuffix(name, ".css") {
-		w.Header().Set("Content-Type", "text/css; charset=utf-8")
-	} else if strings.HasSuffix(name, ".js") {
-		w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
-	}
-	w.Write(data)
+
+	html := string(data)
+	v := web.Version
+	html = strings.ReplaceAll(html, "/assets/style.css", "/assets/style.css?v="+v)
+	html = strings.ReplaceAll(html, "/assets/app.js", "/assets/app.js?v="+v)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache, must-revalidate")
+	w.Write([]byte(html))
 }
+
+func setAssetCache(w http.ResponseWriter, name string) {
+	if strings.HasPrefix(name, "assets/") {
+		// Versioned URLs (?v=...) can be cached; rebuild changes the query string.
+		w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
+	}
+}
+

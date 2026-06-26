@@ -1,7 +1,10 @@
 services:
   asylum-wall:
     image: ghcr.io/khannover/asylum-wall-app:latest
-    build: .
+    build:
+      context: .
+      args:
+        APP_VERSION: local
     container_name: asylum-wall
     restart: unless-stopped
     ports:

@@ -31,6 +31,8 @@ jobs:
           push: true
           provenance: false
           sbom: false
+          build-args: |
+            APP_VERSION=${{ github.sha }}
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.sha }}
