@@ -66,7 +66,13 @@ Image: `ghcr.io/khannover/asylum-wall-app:latest`
 
 After the first push, set the package to **public** under GitHub → Packages → asylum-wall-app → Package settings.
 
-If CI fails with `write_package` / `permission_denied`, check **repo Settings → Actions → General → Workflow permissions** is set to **Read and write permissions** (not read-only).
+CI uses a `GHCR_TOKEN` repo secret (PAT with `write:packages`). Set it once:
+
+```bash
+gh secret set GHCR_TOKEN --repo khannover/asylum-wall-app --body "$(gh auth token)"
+```
+
+Also ensure **Settings → Actions → General → Workflow permissions** is **Read and write**.
 
 ### SSH Deploy Key (alternative)
 
