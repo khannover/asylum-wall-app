@@ -42,6 +42,7 @@ func serveIndex(w http.ResponseWriter, fsys fs.FS) {
 	v := web.Version
 	html = strings.ReplaceAll(html, "/assets/style.css", "/assets/style.css?v="+v)
 	html = strings.ReplaceAll(html, "/assets/app.js", "/assets/app.js?v="+v)
+	html = strings.ReplaceAll(html, "/favicon.svg", "/favicon.svg?v="+v)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache, must-revalidate")
@@ -49,7 +50,7 @@ func serveIndex(w http.ResponseWriter, fsys fs.FS) {
 }
 
 func setAssetCache(w http.ResponseWriter, name string) {
-	if strings.HasPrefix(name, "assets/") {
+	if strings.HasPrefix(name, "assets/") || name == "favicon.svg" {
 		// Versioned URLs (?v=...) can be cached; rebuild changes the query string.
 		w.Header().Set("Cache-Control", "public, max-age=86400, immutable")
 	}
