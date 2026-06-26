@@ -14,6 +14,7 @@ services:
       GIT_USER_EMAIL: ${GIT_USER_EMAIL:-asylum-wall@bancamp.de}
       REPO_PATH: /repo
       PORT: 8080
+      EDIT_TOKEN: ${EDIT_TOKEN:-}
     volumes:
       - asylum-repo:/repo
     # For SSH deploy key auth, uncomment and mount your key:

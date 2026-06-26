@@ -11,6 +11,10 @@
   const ACCOUNT_KEY = "asylum_account_name";
   const ACCOUNT_KEY_LEGACY = "asylum_artist_name";
   const BANCAMP_KEY = "asylum_bancamp_profile";
+  const EDIT_TOKEN_KEY = "asylum_edit_token";
+
+  let editEnabled = false;
+  let activeCase = null;
 
   const PLATFORM_URLS = {
     "Bandcamp": (n) => {
@@ -85,6 +89,14 @@
     signalFileDrop: $("#signal-file-drop"),
     signalFileDropText: $("#signal-file-drop-text"),
     signalProofInput: $("#signal_proof_file"),
+    editModal: $("#edit-modal"),
+    editForm: $("#edit-form"),
+    editError: $("#edit-error"),
+    editBtn: $("#edit-btn"),
+    editFileDrop: $("#edit-file-drop"),
+    editFileDropText: $("#edit-file-drop-text"),
+    editProofInput: $("#edit_proof_file"),
+    modalFooter: $("#modal-footer"),
   };
 
   function escapeHtml(str) {
@@ -334,6 +346,7 @@
   }
 
   function openCaseModal(c) {
+    activeCase = c;
     const id = String(c.id).padStart(4, "0");
     $("#modal-id").textContent = `ENTRY_${id}`;
     const profileURL = c.platform_profile_url || buildProfileURL(c.platform, accountNameOf(c));
@@ -341,11 +354,16 @@
       ? `<a href="${escapeHtml(profileURL)}" target="_blank" rel="noopener" class="case-account-link">${escapeHtml(accountNameOf(c))} ↗</a>`
       : escapeHtml(accountNameOf(c));
 
-    let meta = `${formatDate(c.timestamp)} · ${submissionLabel(c)} · ${escapeHtml(c.platform)}`;
+    let meta = `Logged ${formatDate(c.timestamp)} · ${submissionLabel(c)} · ${escapeHtml(c.platform)}`;
+    if (c.edited_at) {
+      meta += ` · edited ${formatDate(c.edited_at)}`;
+    }
     if (c.bancamp_profile) {
       meta += ` · <a href="${escapeHtml(c.bancamp_profile)}" target="_blank" rel="noopener">Bancamp ↗</a>`;
     }
     $("#modal-meta").innerHTML = meta;
+
+    els.modalFooter.hidden = !editEnabled;
 
     const tags = [
       `<span class="tag">${escapeHtml(c.platform)}</span>`,
@@ -379,6 +397,92 @@
     }
 
     els.caseModal.showModal();
+  }
+
+  function openEditModal() {
+    if (!activeCase) return;
+    const c = activeCase;
+    els.editError.hidden = true;
+    els.editForm.reset();
+
+    $("#edit_entry_label").textContent = `ENTRY_${String(c.id).padStart(4, "0")}`;
+    $("#edit_entry_id").value = c.id;
+    $("#edit_account_name").value = accountNameOf(c);
+    $("#edit_platform").value = c.platform || "Other";
+    $("#edit_bancamp_profile").value = c.bancamp_profile || "";
+    $("#edit_incident_type").value = c.incident_type || "";
+    $("#edit_reason_category").value = c.reason_category || "";
+    $("#edit_story").value = c.story || "";
+    $("#edit_verified").checked = !!c.verified;
+    $("#edit_remove_proof").checked = false;
+
+    const savedToken = sessionStorage.getItem(EDIT_TOKEN_KEY);
+    if (savedToken) $("#edit_token").value = savedToken;
+
+    resetFileDrop(els.editFileDrop, els.editFileDropText, els.editProofInput, "Upload new screenshot or PDF — max 5MB");
+    updateProfilePreview($("#edit_platform"), $("#edit_account_name"), $("#edit-profile-preview"));
+
+    els.caseModal.close();
+    els.editModal.showModal();
+  }
+
+  async function loadMeta() {
+    try {
+      const res = await fetch("/api/meta");
+      if (!res.ok) return;
+      const data = await res.json();
+      editEnabled = !!data.edit_enabled;
+    } catch {
+      editEnabled = false;
+    }
+  }
+
+  async function saveEdit(e) {
+    e.preventDefault();
+    els.editError.hidden = true;
+
+    const token = $("#edit_token").value.trim();
+    if (!token) {
+      els.editError.textContent = "Edit token is required";
+      els.editError.hidden = false;
+      return;
+    }
+
+    const btn = els.editBtn;
+    const label = btn.querySelector(".btn-label");
+    const spinner = btn.querySelector(".btn-spinner");
+    btn.disabled = true;
+    label.hidden = true;
+    spinner.hidden = false;
+
+    const formData = new FormData(els.editForm);
+    formData.set("verified", $("#edit_verified").checked ? "true" : "false");
+    if (!$("#edit_remove_proof").checked) {
+      formData.delete("remove_proof");
+    }
+
+    const entryId = activeCase?.id;
+    try {
+      const res = await fetch(`/api/cases/${entryId}`, {
+        method: "PATCH",
+        headers: { "X-Edit-Token": token },
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Edit failed (${res.status})`);
+
+      sessionStorage.setItem(EDIT_TOKEN_KEY, token);
+      els.editModal.close();
+      showToast(data.message || "Entry updated.");
+      await loadCases();
+    } catch (err) {
+      els.editError.textContent = err.message;
+      els.editError.hidden = false;
+    } finally {
+      btn.disabled = false;
+      label.hidden = false;
+      spinner.hidden = true;
+    }
   }
 
   function openSignalModal(tmpl) {
@@ -513,12 +617,16 @@
     });
 
     $("#close-modal").addEventListener("click", () => els.caseModal.close());
+    $("#edit-case-btn")?.addEventListener("click", openEditModal);
+    $("#close-edit")?.addEventListener("click", () => els.editModal.close());
+    $("#cancel-edit")?.addEventListener("click", () => els.editModal.close());
     $("#close-signal").addEventListener("click", () => els.signalModal.close());
     $("#close-submit").addEventListener("click", () => els.submitModal.close());
     $("#cancel-signal").addEventListener("click", () => els.signalModal.close());
     $("#cancel-submit").addEventListener("click", () => els.submitModal.close());
 
-    [els.caseModal, els.signalModal, els.submitModal].forEach((modal) => {
+    [els.caseModal, els.signalModal, els.submitModal, els.editModal].forEach((modal) => {
+      if (!modal) return;
       modal.addEventListener("click", (e) => {
         if (e.target === modal) modal.close();
       });
@@ -540,6 +648,15 @@
     reportPlatform?.addEventListener("change", refreshReportPreview);
     reportAccount?.addEventListener("input", refreshReportPreview);
 
+    const editPlatform = $("#edit_platform");
+    const editAccount = $("#edit_account_name");
+    const editPreview = $("#edit-profile-preview");
+    const refreshEditPreview = () => updateProfilePreview(editPlatform, editAccount, editPreview);
+    editPlatform?.addEventListener("change", refreshEditPreview);
+    editAccount?.addEventListener("input", refreshEditPreview);
+
+    els.editForm?.addEventListener("submit", saveEdit);
+
     els.signalForm.addEventListener("submit", (e) => {
       e.preventDefault();
       postForm("/api/signal", els.signalForm, els.signalError, els.signalModal, els.signalBtn);
@@ -558,6 +675,7 @@
 
   setupFileDrop(els.fileDrop, els.fileDropText, els.proofInput);
   setupFileDrop(els.signalFileDrop, els.signalFileDropText, els.signalProofInput);
+  setupFileDrop(els.editFileDrop, els.editFileDropText, els.editProofInput);
   bindEvents();
-  loadCases();
+  loadMeta().then(loadCases);
 })();

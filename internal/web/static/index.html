@@ -150,6 +150,96 @@
         <div class="modal-story" id="modal-story"></div>
         <div class="modal-proof" id="modal-proof"></div>
       </div>
+      <footer class="modal-footer" id="modal-footer" hidden>
+        <button type="button" class="btn btn-ghost btn-sm" id="edit-case-btn">Edit entry</button>
+        <span class="modal-footer-note">Changes become a new Git commit</span>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Edit entry modal -->
+  <dialog class="modal modal-form" id="edit-modal" aria-labelledby="edit-title">
+    <div class="modal-inner">
+      <button type="button" class="modal-close" id="close-edit" aria-label="Close">&times;</button>
+      <header class="modal-header">
+        <span class="modal-id" id="edit_entry_label"></span>
+        <h2 id="edit-title" class="modal-title">Edit ledger entry</h2>
+        <p class="modal-subtitle">Updates are committed to Git — full history stays auditable.</p>
+      </header>
+      <form id="edit-form" class="submit-form" enctype="multipart/form-data">
+        <input type="hidden" id="edit_entry_id" name="entry_id">
+        <div class="form-row form-row-2">
+          <div>
+            <label class="form-label" for="edit_account_name">Account name on platform <span class="req">*</span></label>
+            <input class="form-input" type="text" id="edit_account_name" name="account_name" required minlength="2" maxlength="200">
+            <p class="field-hint" id="edit-profile-preview" hidden></p>
+          </div>
+          <div>
+            <label class="form-label" for="edit_platform">Platform <span class="req">*</span></label>
+            <select class="form-input form-select" id="edit_platform" name="platform" required>
+              <option value="Bandcamp">Bandcamp</option>
+              <option value="Spotify">Spotify</option>
+              <option value="YouTube">YouTube</option>
+              <option value="TikTok">TikTok</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Apple Music">Apple Music</option>
+              <option value="SoundCloud">SoundCloud</option>
+              <option value="DistroKid">DistroKid</option>
+              <option value="Facebook">Facebook</option>
+              <option value="X / Twitter">X / Twitter</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="edit_bancamp_profile">Bancamp profile <span class="opt">optional</span></label>
+          <input class="form-input" type="url" id="edit_bancamp_profile" name="bancamp_profile" maxlength="500">
+        </div>
+        <div class="form-row form-row-2">
+          <div>
+            <label class="form-label" for="edit_incident_type">Incident type <span class="req">*</span></label>
+            <input class="form-input" type="text" id="edit_incident_type" name="incident_type" required maxlength="200">
+          </div>
+          <div>
+            <label class="form-label" for="edit_reason_category">Reason category <span class="opt">optional</span></label>
+            <input class="form-input" type="text" id="edit_reason_category" name="reason_category" maxlength="200">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="edit_story">Story <span class="opt">optional</span></label>
+          <textarea class="form-input form-textarea" id="edit_story" name="story" maxlength="10000" rows="4"></textarea>
+        </div>
+        <div class="form-row form-row-check">
+          <label class="form-check">
+            <input type="checkbox" id="edit_verified" name="verified" value="true">
+            <span>Mark as verified</span>
+          </label>
+          <label class="form-check">
+            <input type="checkbox" id="edit_remove_proof" name="remove_proof" value="true">
+            <span>Remove proof file</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="edit_proof_file">Replace proof <span class="opt">optional</span></label>
+          <div class="file-drop file-drop-sm" id="edit-file-drop">
+            <input type="file" id="edit_proof_file" name="proof_file" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.eml,image/*,application/pdf">
+            <span class="file-drop-text" id="edit-file-drop-text">Upload new screenshot or PDF — max 5MB</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="edit_token">Edit token <span class="req">*</span></label>
+          <input class="form-input form-input-mono" type="password" id="edit_token" placeholder="Required to save changes" autocomplete="off">
+          <p class="form-note form-note-muted">Set <code>EDIT_TOKEN</code> on the server. Stored in this browser for the session only.</p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost" id="cancel-edit">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="edit-btn">
+            <span class="btn-label">Commit edit to Git</span>
+            <span class="btn-spinner" hidden></span>
+          </button>
+        </div>
+        <p class="form-note" id="edit-error" role="alert" hidden></p>
+      </form>
     </div>
   </dialog>
 

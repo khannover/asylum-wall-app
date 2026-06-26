@@ -18,6 +18,7 @@ type Config struct {
 	SignalMaxPerHour   int
 	SignalMaxPerDay    int
 	SignalDuplicateTTL time.Duration
+	EditToken          string
 }
 
 func Load() Config {
@@ -40,6 +41,7 @@ func Load() Config {
 		SignalMaxPerHour:   signalHour,
 		SignalMaxPerDay:    signalDay,
 		SignalDuplicateTTL: time.Duration(dupHours) * time.Hour,
+		EditToken:          os.Getenv("EDIT_TOKEN"),
 	}
 }
 

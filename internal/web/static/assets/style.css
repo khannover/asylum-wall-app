@@ -487,6 +487,46 @@ a:hover { text-decoration: underline; }
   text-decoration: underline;
 }
 
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.modal-footer-note {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+.form-row-check {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.form-check input { accent-color: var(--accent); }
+
+.form-input-mono { font-family: var(--font-mono); font-size: 0.85rem; }
+
 /* Filters */
 .filters {
   position: sticky;

@@ -28,6 +28,7 @@ type Entry struct {
 	Story              string `json:"story,omitempty"`
 	ProofFileName      string `json:"proof_file_name,omitempty"`
 	Verified           bool   `json:"verified"`
+	EditedAt           string `json:"edited_at,omitempty"`
 }
 
 type SubmitInput struct {

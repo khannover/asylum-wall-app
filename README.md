@@ -98,4 +98,16 @@ Features: case grid, search/filter/sort, detail modal with proof viewer, submit 
 | `GET` | `/api/proof/{filename}` | Serve proof file (sanitized) |
 | `POST` | `/api/signal` | Quick “same issue here” signal (artist + platform + template) |
 | `POST` | `/api/submit-case` | Full report for unusual cases (multipart) |
+| `PATCH` | `/api/cases/{id}` | Edit entry (`X-Edit-Token` header, multipart) |
+| `GET` | `/api/meta` | Server flags (`edit_enabled`) |
 | `GET` | `/health` | Health check |
+
+### Editing entries
+
+Set `EDIT_TOKEN` in `.env`. Editors open a case → **Edit entry** → save. Each update:
+
+- Rewrites `entries/entry_XXXX.json` (adds `edited_at`, keeps original `timestamp`)
+- Optionally replaces/removes proof files
+- Commits to the ledger repo: `Edit entry_0142: account (Platform)`
+
+History remains in Git — anyone can audit who changed what and when.

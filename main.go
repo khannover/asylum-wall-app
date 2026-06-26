@@ -17,6 +17,7 @@ import (
 type server struct {
 	cfg       config.Config
 	submitter *handlers.Submitter
+	editor    *handlers.Editor
 }
 
 func main() {
@@ -33,6 +34,7 @@ func main() {
 	s := &server{
 		cfg:       cfg,
 		submitter: handlers.NewSubmitter(cfg, repo, limiter),
+		editor:    handlers.NewEditor(cfg, repo, limiter),
 	}
 
 	mux := http.NewServeMux()
@@ -42,9 +44,11 @@ func main() {
 	mux.HandleFunc("GET /health", handleHealth)
 	mux.HandleFunc("GET /api/templates", s.handleTemplates)
 	mux.HandleFunc("GET /api/cases", s.handleListCases)
+	mux.HandleFunc("GET /api/meta", s.editor.HandleMeta)
 	mux.HandleFunc("GET /api/proof/{file}", handlers.ServeProof(cfg.RepoPath))
 	mux.HandleFunc("POST /api/signal", s.submitter.HandleSignal)
 	mux.HandleFunc("POST /api/submit-case", s.submitter.HandleReport)
+	mux.HandleFunc("PATCH /api/cases/{id}", s.editor.HandleEdit)
 
 	handler := withCORS(mux)
 	addr := fmt.Sprintf(":%d", cfg.Port)
@@ -82,8 +86,8 @@ func (s *server) handleTemplates(w http.ResponseWriter, r *http.Request) {
 func withCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Edit-Token")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return

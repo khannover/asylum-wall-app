@@ -149,11 +149,13 @@ func (r *Repo) CommitAndPushWithMessage(msg string, paths ...string) error {
 	if err := r.run(args...); err != nil {
 		return err
 	}
+	return r.commitAndPush(msg)
+}
 
+func (r *Repo) commitAndPush(msg string) error {
 	if err := r.run("git", "commit", "-m", msg); err != nil {
 		return err
 	}
-
 	return r.run("git", "push", "origin", r.cfg.GitBranch)
 }
 
