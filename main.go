@@ -31,6 +31,13 @@ func main() {
 		log.Fatalf("git init failed: %v", err)
 	}
 	log.Println("git repository ready")
+	if cfg.DiscordNotifyEnabled() {
+		log.Println("discord verification notifications: enabled")
+	} else if cfg.DiscordWebhookURL != "" {
+		log.Println("discord verification notifications: disabled — DISCORD_WEBHOOK_URL must start with https://discord.com/api/webhooks/")
+	} else {
+		log.Println("discord verification notifications: disabled — DISCORD_WEBHOOK_URL not set")
+	}
 
 	limiter := ratelimit.New()
 	s := &server{
@@ -72,7 +79,8 @@ func handleHealth(w http.ResponseWriter, r *http.Request) {
 
 func (s *server) handleMeta(w http.ResponseWriter, r *http.Request) {
 	meta := map[string]bool{
-		"edit_enabled": s.cfg.EditToken != "",
+		"edit_enabled":            s.cfg.EditToken != "",
+		"discord_notify_enabled":  s.cfg.DiscordNotifyEnabled(),
 	}
 	for k, v := range s.verifier.HandleMetaFields() {
 		meta[k] = v

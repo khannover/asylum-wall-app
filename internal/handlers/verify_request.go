@@ -64,7 +64,7 @@ func (v *VerifyRequester) HandleRequest(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if v.cfg.DiscordWebhookURL != "" {
+	if v.cfg.DiscordNotifyEnabled() {
 		payload := discord.VerificationPayload{
 			Entry:      entry,
 			SiteURL:    v.cfg.PublicSiteURL,
@@ -72,7 +72,11 @@ func (v *VerifyRequester) HandleRequest(w http.ResponseWriter, r *http.Request) 
 		}
 		if err := discord.NotifyVerificationRequest(v.cfg.DiscordWebhookURL, payload); err != nil {
 			log.Printf("discord verification notify failed for %s: %v", label, err)
+		} else {
+			log.Printf("discord verification notify sent for %s", label)
 		}
+	} else if v.cfg.DiscordWebhookURL != "" {
+		log.Printf("discord verification notify skipped for %s: invalid DISCORD_WEBHOOK_URL (use https://discord.com/api/webhooks/...)", label)
 	}
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{

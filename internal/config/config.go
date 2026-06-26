@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -46,8 +47,8 @@ func Load() Config {
 		SignalMaxPerDay:    signalDay,
 		SignalDuplicateTTL: time.Duration(dupHours) * time.Hour,
 		EditToken:          os.Getenv("EDIT_TOKEN"),
-		DiscordWebhookURL:  os.Getenv("DISCORD_WEBHOOK_URL"),
-		PublicSiteURL:      getEnv("PUBLIC_SITE_URL", getEnv("SITE_URL", "")),
+		DiscordWebhookURL:  normalizeWebhookURL(os.Getenv("DISCORD_WEBHOOK_URL")),
+		PublicSiteURL:      strings.TrimSpace(getEnv("PUBLIC_SITE_URL", getEnv("SITE_URL", ""))),
 		VerifyMaxPerHour:   verifyHour,
 	}
 }
@@ -57,4 +58,19 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func normalizeWebhookURL(raw string) string {
+	raw = strings.TrimSpace(raw)
+	raw = strings.Trim(raw, `"'`)
+	return raw
+}
+
+func (c Config) DiscordNotifyEnabled() bool {
+	return isValidDiscordWebhookURL(c.DiscordWebhookURL)
+}
+
+func isValidDiscordWebhookURL(url string) bool {
+	return strings.HasPrefix(url, "https://discord.com/api/webhooks/") ||
+		strings.HasPrefix(url, "https://discordapp.com/api/webhooks/")
 }

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/khannover/asylum-wall-app/internal/entries"
@@ -71,7 +73,12 @@ func NotifyVerificationRequest(webhookURL string, p VerificationPayload) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("discord webhook returned %d", resp.StatusCode)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		msg := strings.TrimSpace(string(body))
+		if msg == "" {
+			return fmt.Errorf("discord webhook returned %d", resp.StatusCode)
+		}
+		return fmt.Errorf("discord webhook returned %d: %s", resp.StatusCode, msg)
 	}
 	return nil
 }
