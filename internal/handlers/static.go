@@ -50,6 +50,10 @@ func serveIndex(w http.ResponseWriter, fsys fs.FS) {
 }
 
 func setAssetCache(w http.ResponseWriter, name string) {
+	if strings.HasSuffix(name, ".html") {
+		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
+		return
+	}
 	if strings.HasPrefix(name, "assets/") || name == "favicon.svg" {
 		// Versioned URLs (?v=...) can be cached; rebuild changes the query string.
 		w.Header().Set("Cache-Control", "public, max-age=86400, immutable")

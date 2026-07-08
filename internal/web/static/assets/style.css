@@ -1106,6 +1106,116 @@ a:hover { text-decoration: underline; }
   margin-top: 8px;
 }
 
+.footer-legal {
+  margin-top: 14px;
+  font-size: 0.8rem;
+}
+
+.footer-legal a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-legal a:hover { color: var(--accent); }
+
+.footer-legal-sep {
+  margin: 0 0.5rem;
+  color: var(--text-dim);
+}
+
+/* Legal pages */
+.legal-page { cursor: default; }
+
+.legal {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 92vw);
+  margin: 0 auto;
+  padding: 2.5rem 0 3rem;
+}
+
+.legal-head { margin-bottom: 2rem; }
+
+.legal-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--accent);
+  text-decoration: none;
+  margin-bottom: 0.75rem;
+}
+
+.legal-back:hover { text-decoration: underline; }
+
+.legal-node {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.legal-main h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+}
+
+.legal-lead {
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+}
+
+.legal-block {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-block:last-of-type {
+  border-bottom: none;
+}
+
+.legal-block h2 {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 400;
+  margin-bottom: 0.85rem;
+  color: var(--accent);
+}
+
+.legal-block p {
+  color: var(--text);
+  margin-bottom: 0.85rem;
+}
+
+.legal-block p:last-child { margin-bottom: 0; }
+
+.legal-block a {
+  color: var(--accent);
+}
+
+.legal-block a:hover { text-decoration: underline; }
+
+.legal-list {
+  margin: 0.5rem 0 0.85rem 1.25rem;
+  color: var(--text);
+}
+
+.legal-list li { margin-bottom: 0.35rem; }
+
+.legal-meta {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.legal-foot { margin-top: 1rem; }
+
+.legal-foot-sep {
+  margin: 0 0.5rem;
+  color: var(--text-dim);
+}
+
 /* Modals */
 .modal {
   border: none;
