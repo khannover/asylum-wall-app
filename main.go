@@ -50,6 +50,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /{$}", handlers.Static())
+	mux.Handle("GET /{name}.html", handlers.Static())
 	mux.Handle("GET /assets/", handlers.Static())
 	mux.Handle("GET /favicon.svg", handlers.Static())
 	mux.HandleFunc("GET /health", handleHealth)
